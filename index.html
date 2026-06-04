@@ -1,1 +1,456 @@
 
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>0605</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Noto+Serif+TC:wght@300;400&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --white-high:   rgba(255, 255, 255, 0.88);
+      --white-mid:    rgba(255, 255, 255, 0.55);
+      --white-low:    rgba(255, 255, 255, 0.28);
+      --white-ghost:  rgba(255, 255, 255, 0.12);
+      --red-soft:     rgba(255, 100, 100, 0.55);
+      --font-serif:   'Noto Serif TC', serif;
+      --font-display: 'Cormorant Garamond', serif;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      background: #080808;
+      color: var(--white-high);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: var(--font-serif);
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #container {
+      width: min(92vw, 540px);
+      text-align: center;
+      position: relative;
+    }
+
+    .screen { transition: opacity 1s ease; }
+    .screen.hidden { opacity: 0; pointer-events: none; }
+
+    /* TAP */
+    #tap-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 999;
+    }
+
+    #tap-hint {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 7px;
+      text-transform: uppercase;
+      color: var(--white-mid);
+      animation: breath 3.5s ease-in-out infinite;
+    }
+
+    @keyframes breath {
+      0%, 100% { opacity: 0.15; }
+      50%       { opacity: 0.5;  }
+    }
+
+    /* PASSWORD */
+    #password-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #pw-title {
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--white-low);
+    }
+
+    #pwd {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--white-ghost);
+      color: rgba(255, 255, 255, 0.7);
+      padding: 10px 6px;
+      width: 130px;
+      text-align: center;
+      letter-spacing: 9px;
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 300;
+      outline: none;
+      caret-color: var(--white-low);
+      transition: border-bottom-color 0.5s ease;
+      -webkit-text-security: disc;
+      text-security: disc;
+      -webkit-appearance: none;
+      border-radius: 0;
+    }
+
+    #pwd:focus { border-bottom-color: rgba(255, 255, 255, 0.3); }
+
+    #pw-hint {
+      font-family: var(--font-display);
+      font-size: 9px;
+      font-weight: 300;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--white-ghost);
+    }
+
+    #pw-error {
+      font-family: var(--font-display);
+      font-size: 9px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--red-soft);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    /* COUNTDOWN */
+    #countdown-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #cd-label {
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--white-low);
+    }
+
+    #cd-time {
+      font-family: var(--font-display);
+      font-size: clamp(52px, 13vw, 88px);
+      font-weight: 300;
+      letter-spacing: 3px;
+      font-variant-numeric: tabular-nums;
+      color: var(--white-high);
+      line-height: 1;
+    }
+
+    #cd-date {
+      font-family: var(--font-display);
+      font-size: 9px;
+      font-weight: 300;
+      letter-spacing: 5px;
+      color: var(--white-low);
+    }
+
+    #cd-line {
+      width: 1px;
+      height: 40px;
+      background: rgba(255,255,255,0.08);
+      animation: linepulse 4s ease-in-out infinite;
+    }
+
+    @keyframes linepulse {
+      0%, 100% { opacity: 0.08; transform: scaleY(0.65); }
+      50%       { opacity: 0.38; transform: scaleY(1.35); }
+    }
+
+    /* MESSAGE */
+    #msg-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      min-height: 120px;
+    }
+
+    .line {
+      display: none;
+      opacity: 0;
+      transition: opacity 1.8s ease;
+      font-family: var(--font-serif);
+      font-size: clamp(17px, 4.4vw, 23px);
+      font-weight: 300;
+      line-height: 2;
+      color: var(--white-high);
+      letter-spacing: 0.5px;
+    }
+
+    .line.active { display: block; }
+    .line.show   { opacity: 1; }
+
+    .line.birthday {
+      font-family: var(--font-display);
+      font-size: clamp(17px, 3.8vw, 22px);
+      font-weight: 300;
+      letter-spacing: 11px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 8px;
+      text-transform: uppercase;
+      transition: opacity 2.2s ease;
+    }
+
+    .line.sign {
+      font-family: var(--font-display);
+      font-size: clamp(10px, 2vw, 12px);
+      font-weight: 300;
+      letter-spacing: 4px;
+      color: var(--white-low);
+      margin-top: 12px;
+      transition: opacity 2.2s ease;
+    }
+  </style>
+</head>
+
+<body>
+<div id="container">
+
+  <div id="tap-screen" class="screen">
+    <div id="tap-hint">for you</div>
+  </div>
+
+  <div id="password-screen" class="screen">
+    <div id="pw-title">Enter Password</div>
+    <input id="pwd" type="tel" inputmode="numeric" maxlength="4" autocomplete="off"/>
+    <div id="pw-hint">hint : a special day</div>
+    <div id="pw-error">wrong</div>
+  </div>
+
+  <div id="countdown-screen" class="screen">
+    <div id="cd-label">counting down to</div>
+    <div id="cd-time">--:--:--</div>
+    <div id="cd-date">06 · 05 · 2026</div>
+    <div id="cd-line"></div>
+  </div>
+
+  <div id="msg-screen" class="screen">
+    <div class="line" id="l1">早安，好久不見。</div>
+    <div class="line" id="l2">雖然現在應該很晚了，然後我應該現在睡著了。</div>
+    <div class="line" id="l3">這是今天在忙碌中做出來的網站。</div>
+    <div class="line" id="l4">我覺得今天是一個特別的日子。</div>
+    <div class="line" id="l5">我想說，謝謝你。</div>
+    <div class="line" id="l6">謝謝你突然的出現，<br>讓我重新思考這一切。</div>
+    <div class="line" id="l7">好像突然遇到一個好久不見的人。</div>
+    <div class="line" id="l8">我好想再待一下。</div>
+    <div class="line" id="l9">但又要分開了。</div>
+    <div class="line" id="l10">其實挺難過的。</div>
+    <div class="line" id="l11">但我們應該還會再見面吧。</div>
+    <div class="line" id="l12">反正我不會忘記你的。</div>
+    <div class="line" id="l13">然後你也不要忘記我。</div>
+    <div class="line" id="l14">就醬，有緣再見囉。</div>
+    <div class="line birthday" id="l15">HAPPY BIRTHDAY.</div>
+    <div class="line sign"     id="l16">— Li Yang</div>
+  </div>
+
+</div>
+
+<audio id="bgMusic" preload="auto" loop playsinline>
+  <source src="./audio/music.mp3" type="audio/mpeg"/>
+</audio>
+
+<script>
+const PASSWORD = '0605';
+const UNLOCK   = new Date('2026-06-05T00:00:00+08:00');
+
+const READ_MS = 3200;
+const FADE_MS =  900;
+
+const tapScreen = document.getElementById('tap-screen');
+const pwScreen  = document.getElementById('password-screen');
+const cdScreen  = document.getElementById('countdown-screen');
+const msgScreen = document.getElementById('msg-screen');
+const pwInput   = document.getElementById('pwd');
+const pwError   = document.getElementById('pw-error');
+const cdTime    = document.getElementById('cd-time');
+const bgMusic   = document.getElementById('bgMusic');
+
+const bodyLines    = [...Array(14)].map((_, i) => document.getElementById(`l${i + 1}`));
+const specialLines = [document.getElementById('l15'), document.getElementById('l16')];
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ── Tick sound (Web Audio) ── */
+let ctx = null, tickTimer = null;
+
+function initAudio() {
+  if (ctx) return;
+  try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+}
+
+function playTick() {
+  if (!ctx) return;
+  try {
+    if (ctx.state === 'suspended') ctx.resume();
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.13, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+    g.connect(ctx.destination);
+    const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.07), ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++)
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 6);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(g);
+    src.start();
+  } catch (e) {}
+}
+
+function startTicks() {
+  stopTicks();
+  playTick();
+  tickTimer = setInterval(playTick, 1000);
+}
+
+function stopTicks() {
+  if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
+}
+
+/* ── Music (HTML audio + volume ramp) ── */
+function fadeInMusic() {
+  bgMusic.volume = 0;
+  bgMusic.currentTime = 0;
+  bgMusic.play().catch(() => {});
+  let vol = 0;
+  const target = 0.35, steps = 70, inc = target / steps;
+  const id = setInterval(() => {
+    vol = Math.min(vol + inc, target);
+    bgMusic.volume = vol;
+    if (vol >= target) clearInterval(id);
+  }, 50);
+}
+
+function fadeOutMusic(durationMs) {
+  const start = bgMusic.volume;
+  const steps = Math.round(durationMs / 50);
+  const dec = start / steps;
+  let vol = start;
+  const id = setInterval(() => {
+    vol = Math.max(vol - dec, 0);
+    bgMusic.volume = vol;
+    if (vol <= 0) { clearInterval(id); bgMusic.pause(); }
+  }, 50);
+}
+
+/* ── Tap to start ── */
+let started = false;
+
+async function handleFirstTap() {
+  if (started) return;
+  started = true;
+  window.removeEventListener('click',      handleFirstTap);
+  window.removeEventListener('touchstart', handleFirstTap);
+  initAudio();
+  try { if (ctx?.state === 'suspended') ctx.resume(); } catch (e) {}
+  pwScreen.style.display = 'flex';
+  pwInput.focus();
+  tapScreen.classList.add('hidden');
+  await sleep(950);
+  tapScreen.style.display = 'none';
+}
+
+window.addEventListener('click',      handleFirstTap);
+window.addEventListener('touchstart', handleFirstTap, { passive: true });
+
+/* ── Password ── */
+pwInput.addEventListener('input', async () => {
+  if (pwInput.value.length < 4) return;
+  if (pwInput.value === PASSWORD) {
+    pwInput.blur();
+    pwScreen.classList.add('hidden');
+    await sleep(1000);
+    pwScreen.style.display = 'none';
+    Date.now() < UNLOCK.getTime() ? startCountdown() : reveal();
+  } else {
+    pwError.style.opacity = '1';
+    pwInput.value = '';
+    setTimeout(() => pwError.style.opacity = '0', 1500);
+  }
+});
+
+/* ── Countdown ── */
+function startCountdown() {
+  cdScreen.style.display = 'flex';
+  startTicks();
+  tick();
+}
+
+function tick() {
+  const diff = UNLOCK - Date.now();
+  if (diff <= 0) { stopTicks(); reveal(); return; }
+  const h = String(Math.floor(diff / 3_600_000)).padStart(2, '0');
+  const m = String(Math.floor(diff % 3_600_000 / 60_000)).padStart(2, '0');
+  const s = String(Math.floor(diff % 60_000 / 1_000)).padStart(2, '0');
+  cdTime.textContent = `${h}:${m}:${s}`;
+  setTimeout(tick, 1000);
+}
+
+/* ── Reveal ── */
+async function reveal() {
+  stopTicks();
+  if (cdScreen.style.display !== 'none') {
+    cdScreen.classList.add('hidden');
+    await sleep(1400);
+    cdScreen.style.display = 'none';
+  }
+  msgScreen.style.display = 'flex';
+  await sleep(800);
+  fadeInMusic();
+
+  for (const line of bodyLines) {
+    line.classList.add('active');
+    await sleep(40);
+    line.classList.add('show');
+    await sleep(READ_MS);
+    line.classList.remove('show');
+    await sleep(FADE_MS);
+    line.classList.remove('active');
+  }
+
+  await sleep(200);
+  specialLines[0].classList.add('active');
+  specialLines[1].classList.add('active');
+  await sleep(40);
+  specialLines[0].classList.add('show');
+  await sleep(1200);
+  specialLines[1].classList.add('show');
+
+  await sleep(6000);
+  fadeOutMusic(3000);
+  msgScreen.style.transition = 'opacity 3s ease';
+  msgScreen.style.opacity = '0';
+  document.body.style.transition = 'background 3s ease';
+  document.body.style.background = '#000';
+}
+</script>
+</body>
+</html>
