@@ -246,8 +246,8 @@
 
   <div id="countdown-screen" class="screen">
     <div id="cd-label">counting down to</div>
-    <div id="cd-time">00:00:10</div>
-    <div id="cd-date">10 · 00 · 00</div>
+    <div id="cd-time">00:00:01</div>
+    <div id="cd-date">01 · 00 · 00</div>
     <div id="cd-line"></div>
   </div>
 
@@ -282,8 +282,8 @@ const PASSWORD = '0605';
 const READ_MS = 3200;
 const FADE_MS = 900;
 
-/* 10 秒倒數 */
-const COUNTDOWN_SECONDS = 10;
+/* 1 秒倒數 */
+const COUNTDOWN_SECONDS = 1;
 
 const tapScreen = document.getElementById('tap-screen');
 const pwScreen  = document.getElementById('password-screen');
@@ -398,7 +398,7 @@ pwInput.addEventListener('input', async () => {
   }
 });
 
-/* ── Countdown 10 秒 ── */
+/* ── Countdown 1 秒 ── */
 let countdownLeft = COUNTDOWN_SECONDS;
 let countdownTimer = null;
 
